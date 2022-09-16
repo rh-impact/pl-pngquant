@@ -121,6 +121,7 @@ class Pngquant(ChrisApp):
         Define the CLI arguments accepted by this plugin app.
         Use self.add_argument to specify a new app argument.
         """
+        self.add_argument('--force', '-f', optional=True, default=False, dest='force', type=bool, help='overwrite existing output files');
 
     def run(self, options):
         """
@@ -138,6 +139,9 @@ class Pngquant(ChrisApp):
 
             if options.verbosity != '0':
                 cmd.append('--verbose')
+
+            if options.force:
+                cmd.append('--force')
 
             cmd.append('--output')
             cmd.append(outputpath)
