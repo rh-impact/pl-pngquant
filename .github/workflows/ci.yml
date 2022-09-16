@@ -33,7 +33,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'release'
     runs-on: ubuntu-20.04
 
-    # we want to both push the build to DockerHub, but also
+    # we want to both push the build to quay.io, but also
     # keep a local copy so that we can run
     #
     #     docker run fnndsc/pl-app app --json > App.json
@@ -82,15 +82,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Login to DockerHub
-        id: dockerhub_login
+      - name: Login to quay.io
+        id: quay_login
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -103,7 +104,7 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: |
-            ${{ steps.determine.outputs.dock_image }}
+            quay.io/${{ steps.determine.outputs.dock_image }}
             localhost:5000/${{ steps.determine.outputs.dock_image }}
             ghcr.io/${{ steps.determine.outputs.dock_image }}
           platforms: linux/amd64
@@ -124,16 +125,6 @@ jobs:
 
           echo "::set-output name=json::$json"
           echo "::set-output name=title::$(jq -r '.title' <<< "$json")"
-
-      - name: Update DockerHub description
-        uses: peter-evans/dockerhub-description@v2
-        continue-on-error: true  # it is not crucial that this works
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          short-description: ${{ steps.pluginmeta.outputs.title }}
-          readme-filepath: ./README.rst
-          repository: ${{ steps.determine.outputs.repo }}
 
       - name: Upload to ChRIS Store
         if: "!endsWith(steps.determine.outputs.dock_image, ':latest')"
@@ -163,4 +154,3 @@ jobs:
             echo "$res"
             exit $success
           fi
-
