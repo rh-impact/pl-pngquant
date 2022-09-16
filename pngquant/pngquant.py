@@ -8,7 +8,9 @@
 #                        dev@babyMRI.org
 #
 
+from email.policy import default
 from chrisapp.base import ChrisApp
+import subprocess, sys, os
 
 
 Gstr_title = r"""
@@ -126,6 +128,25 @@ class Pngquant(ChrisApp):
         """
         print(Gstr_title)
         print('Version: %s' % self.get_version())
+        print('Copressing PNG images here %s to %s' % (options.inputdir, options.outputdir))
+        for filename in os.listdir(options.inputdir):
+            inputpath = os.path.join(options.inputdir, filename)
+
+            outputpath = os.path.join(options.outputdir, filename)
+
+            cmd = ['/usr/bin/pngquant']
+
+            if options.verbosity != '0':
+                cmd.append('--verbose')
+
+            cmd.append('--output')
+            cmd.append(outputpath)
+            cmd.append('--')
+            cmd.append(inputpath)
+
+            sys.stdout.flush()
+
+            subprocess.run(cmd, check=True)
 
     def show_man_page(self):
         """
