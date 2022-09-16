@@ -6,7 +6,7 @@ with open(path.join(path.dirname(path.abspath(__file__)), 'README.rst')) as f:
 
 setup(
     name             = 'pngquant',
-    version          = '0.1',
+    version          = '1.0.0',
     description      = 'Compress PNG images using pngquant.',
     long_description = readme,
     author           = 'brusdev',
