@@ -10,7 +10,7 @@
 
 from email.policy import default
 from chrisapp.base import ChrisApp
-import subprocess, sys, os
+import subprocess, sys, os, re
 
 
 Gstr_title = r"""
@@ -122,6 +122,7 @@ class Pngquant(ChrisApp):
         Use self.add_argument to specify a new app argument.
         """
         self.add_argument('--force', '-f', optional=True, default=False, dest='force', type=bool, help='overwrite existing output files');
+        self.add_argument('--ext', '-e', optional=True, default='', dest='ext', type=str, help='set custom suffix/extension for output filenames');
 
     def run(self, options):
         """
@@ -133,7 +134,10 @@ class Pngquant(ChrisApp):
         for filename in os.listdir(options.inputdir):
             inputpath = os.path.join(options.inputdir, filename)
 
-            outputpath = os.path.join(options.outputdir, filename)
+            if not options.ext:
+                outputpath = os.path.join(options.outputdir, filename)
+            else:
+                outputpath = os.path.join(options.outputdir, re.sub('\.\w+$', options.ext, filename))
 
             cmd = ['/usr/bin/pngquant']
 
